@@ -1,0 +1,172 @@
+{
+  // Use IntelliSense to find out which attributes exist for C# debugging
+  // Use hover for the description of the existing attributes
+  // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
+  "version": "0.2.0",
+  "compounds": [
+    {
+      "name": "Launch API & UI (Live Watch)",
+      "configurations": ["API Launch (Live Watch)", "UI Launch"]
+    },
+    {
+      "name": "Launch API & UI (Docker)",
+      "configurations": ["API Launch (Docker)", "UI Launch (Docker)"]
+    }
+  ],
+  "configurations": [
+    {
+      "name": "UI Launch",
+      "type": "chrome",
+      "request": "launch",
+      "preLaunchTask": "ng serve dev local",
+      "url": "http://localhost:80/#",
+      "webRoot": "${workspaceFolder}/ng-app",
+      "sourceMapPathOverrides": {
+        "webpack:/*": "${webRoot}/*",
+        "/./*": "${webRoot}/*",
+        "/src/*": "${webRoot}/*",
+        "/*": "*",
+        "/./~/*": "${webRoot}/node_modules/*"
+      }
+    },
+    {
+      "name": "API Launch",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build api",
+      // If you have changed target frameworks, make sure to update the program path.
+      "program": "${workspaceFolder}/CoreWebApi/bin/Debug/netcoreapp2.2/CoreWebApi.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/CoreWebApi",
+      "stopAtEntry": false,
+      // Enable launching a web browser when ASP.NET Core starts. For more information: https://aka.ms/VSCode-CS-LaunchJson-WebBrowser
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "^\\s*Now listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/CoreWebApi/Views"
+      }
+    },
+    {
+      "name": "Data API Launch",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build data api",
+      // If you have changed target frameworks, make sure to update the program path.
+      "program": "${workspaceFolder}/CoreDataApi/bin/Debug/netcoreapp2.2/CoreDataApi.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/CoreDataApi",
+      "stopAtEntry": false,
+      // Enable launching a web browser when ASP.NET Core starts. For more information: https://aka.ms/VSCode-CS-LaunchJson-WebBrowser
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "^\\s*Now listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/CoreDataApi/Views"
+      }
+    },
+    {
+      "name": "API Launch (Live Watch)",
+      "type": "DotNetAutoAttach",
+      "request": "launch",
+      "args": [],
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    {
+      "name": "API Attach",
+      "type": "coreclr",
+      "request": "attach",
+      "processId": "${command:pickProcess}"
+    },
+    {
+      "name": "UI Launch (Docker)",
+      "type": "chrome",
+      "request": "launch",
+      "preLaunchTask": "serve ui dev docker",
+      "postDebugTask": "remove ui dev docker container",
+      "url": "http://localhost:4200",
+      "webRoot": "${workspaceFolder}/ng-app",
+      "sourceMapPathOverrides": {
+        "webpack:/*": "${webRoot}/*",
+        "/./*": "${webRoot}/*",
+        "/src/*": "${webRoot}/*",
+        "/*": "*",
+        "/./~/*": "${webRoot}/node_modules/*"
+      }
+    },
+    {
+      "name": "API Launch (Docker)",
+      "type": "docker-coreclr",
+      "request": "launch",
+      "preLaunchTask": "build api",
+      "configureAspNetCoreSsl": true,
+      "appProject": "${workspaceFolder}/CoreWebApi/CoreWebApi.csproj",
+      "dockerBuild": {
+        "dockerfile": "${workspaceFolder}/CoreWebApi/.docker/development.dockerfile",
+        /*As our docker file resides inside .docker folder, reset conext to project root
+        i.e. vscode-workflow/CoreWebApi*/
+        "context": "${workspaceFolder}/CoreWebApi",
+        "target": "base"
+      },
+      "dockerRun": {
+        "env": {
+          /*The aspnet core docker container runs by default on port 80,
+          force it to run on 5000 & 5001. We are using "0.0.0.0" instead of "localhost"
+          as using "localhost" cause app to break when the docker container is run using docker-compose*/
+          "ASPNETCORE_URLS": "http://0.0.0.0:5000;https://0.0.0.0:5001"
+        },
+        "ports": [
+          {
+            "hostPort": "5000",
+            "containerPort": "5000"
+          },
+          {
+            "hostPort": "5001",
+            "containerPort": "5001"
+          }
+        ],
+        "volumes": [
+          {
+            "localPath": "${workspaceFolder}/CoreWebApi/",
+            "containerPath": "/src",
+            "permissions": "rw"
+          }
+        ]
+      }
+    },
+
+    {
+      "name": "UI E2E Test",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/ng-app/node_modules/protractor/bin/protractor",
+      "protocol": "inspector",
+      "args": ["${workspaceFolder}/ng-app/e2e/protractor.conf.js"]
+    },
+    {
+      "name": "UI Test",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:9876/debug.html",
+      "webRoot": "${workspaceFolder}/ng-app",
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack:/*": "${webRoot}/*",
+        "/./*": "${webRoot}/*",
+        "/src/*": "${webRoot}/*",
+        "/*": "*",
+        "/./~/*": "${webRoot}/node_modules/*"
+      }
+    }
+  ]
+}

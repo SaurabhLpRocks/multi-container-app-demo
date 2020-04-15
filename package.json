@@ -1,0 +1,66 @@
+{
+  "name": "vscode-workflow",
+  "version": "1.0.0",
+  "description": "Fullstack app to demonstrate end to end workflow of Angular and ASP Net Core app inside VS Code.",
+  "main": "index.js",
+  "keywords": [
+    "vscode",
+    "angular",
+    "aspnetcore",
+    ".net",
+    "angular-cli",
+    "workflow",
+    "vscode-workflow"
+  ],
+  "author": "Saurabh Palatkar",
+  "license": "MIT",
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+      "pre-commit": "lint-staged",
+      "post-commit": "git update-index --again"
+    }
+  },
+  "lint-staged": {
+    "ng-app/src/**/*.ts": [
+      "npm run fix-ng-lint",
+      "git add"
+    ],
+    "*.{html,scss,md,css}": [
+      "npm run fix-formatting",
+      "git add"
+    ]
+  },
+  "scripts": {
+    "setup": "concurrently \"npm:install-dependencies\" \"npm:build-docker-images\"",
+    "install-dependencies": "concurrently \"npm:install-ui-packages\" \"npm:install-api-packages\"",
+    "install-ui-packages": "cd ng-app && npm i",
+    "install-api-packages": "cd CoreWebApi && dotnet restore",
+    "build-docker-images": "concurrently \"npm:build-ui-dev-docker\" \"npm:build-ui-prod-docker\" \"npm:build-api-dev-docker\" \"npm:build-api-prod-docker\"",
+    "build-ui-dev-docker": "cd ng-app && npm run docker-build-dev",
+    "build-ui-prod-docker": "cd ng-app && npm run docker-build-prod",
+    "build-api-dev-docker": "docker-compose -f CoreWebApi/docker-compose.development.yml build",
+    "build-api-prod-docker": "docker-compose -f CoreWebApi/docker-compose.production.yml build",
+    "serve-ui-dev-local": "cd ng-app &&  ng serve",
+    "serve-api-dev-local": "cd CoreWebApi && dotnet run watch --project=CoreWebApi.csproj",
+    "serve-app-dev-local": "concurrently \"npm:serve-ui-dev-local\" \"npm:serve-api-dev-local\"",
+    "serve-ui-dev-docker": "cd ng-app && npm run docker-serve-dev",
+    "remove-ui-dev-docker-container": "docker rm -f ng.app.dev.container",
+    "serve-api-dev-docker": "docker-compose -f CoreWebApi/docker-compose.development.yml up --build -d",
+    "serve-app-dev-docker": "docker-compose -f docker-compose.development.yml up --build -d",
+    "serve-ui-prod-docker": "cd ng-app && npm run docker-serve-prod",
+    "serve-api-prod-docker": "docker-compose -f CoreWebApi/docker-compose.production.yml up --build -d",
+    "serve-app-prod-docker": "concurrently \"npm:serve-api-prod-docker\" \"npm:serve-ui-prod-docker\"",
+    "fix-formatting": "prettier --config ./ng-app/.prettierrc --write \"{,!(node_modules|dist|build|coverage)/**/}*.{ts,html,scss,md,css}\"",
+    "fix-ng-lint": "cd ng-app && ng-lint-staged lint --fix --"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^8.1.0",
+    "@commitlint/config-conventional": "^8.1.0",
+    "concurrently": "^4.1.2",
+    "husky": "^3.0.5",
+    "lint-staged": "^9.2.5",
+    "ng-lint-staged": "^0.1.6",
+    "prettier": "^1.18.2"
+  }
+}
